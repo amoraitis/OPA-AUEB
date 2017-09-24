@@ -8,8 +8,10 @@ using System.Reflection;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using System.Net;
+using Flurl.Http;
 using System.Linq;
+using Newtonsoft.Json;
+using AuebUnofficial.Model;
 
 namespace AuebUnofficial
 {
@@ -46,8 +48,8 @@ namespace AuebUnofficial
             mystringtext = await response.Content.ReadAsStringAsync();
             //converts string to an array
             List<string> parts = mystringtext.Split('\n').Select(p => p.Trim()).ToList();
-            //sets the url
-            x1 = parts[0];
+            //sets the urls
+            x1 = JsonConvert.DeserializeObject<Day2Day>(await "http://auebunofficialapi.azurewebsites.net/Day2Day/Details/fall".GetAsync().ReceiveString()).Link;
             x2 = parts[1];            
             /////////////////////////////////////////////////////////////////////
             // Create an instance of HttpClient
@@ -65,19 +67,22 @@ namespace AuebUnofficial
             // Display the PDF document in PdfViewer
             pdfViewer.LoadDocument(loadedDocument);
             httpClient.Dispose();
+            cb1.SelectedIndex = 0;
+            cb2.SelectedIndex = 0;
         }
         //This method changes the Header text when necessary and loading the other pdf in the pdfviewer
-        //this method should unload the documents from memory, will be fixed in the future
+        //TODO: this method should unload the documents from memory, will be fixed in the future
         private void Change_Frame(object sender, RoutedEventArgs e)
         {
 
             if (orologio.Text.Equals("Ωρολόγιο Πρόγραμμα"))
             {
+                
                 orologio.Text = "Πρόγραμμα Εξεταστικής";
                 combost.Visibility = Visibility.Collapsed;
                 datepick.Visibility = Visibility.Visible;
-                cb1.SelectedItem = null;
-                cb2.SelectedItem = null;
+                cb1.SelectedIndex = 0;
+                cb2.SelectedIndex = 0;
                 pdfViewer.GotoPage(1);
                 // Load the Byte array
                 PdfLoadedDocument loadedDocument = new PdfLoadedDocument(contentBytesx2);
@@ -87,6 +92,7 @@ namespace AuebUnofficial
             }
             else
             {
+                //closing
                 orologio.Text = "Ωρολόγιο Πρόγραμμα";
                 datepick.Visibility = Visibility.Collapsed;
                 combost.Visibility = Visibility.Visible;
@@ -97,6 +103,7 @@ namespace AuebUnofficial
 
                 // Display the PDF document in PdfViewer
                 pdfViewer.LoadDocument(loadedDocument);
+                loadedDocument.Dispose();
             }
         }
 
@@ -118,9 +125,18 @@ namespace AuebUnofficial
         //This method gets the ComboBoxItem selected from the user and changes the page in the PdfViewer
         private void Button_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
+            int x = -1;
             ComboboxItem car1 = (ComboboxItem)cb1.SelectedItem;
             ComboboxItem car2 = (ComboboxItem)cb2.SelectedItem;
-            int x = 4 * (car1.Value) + (car2.Value);
+            //if(car1==null || car2 == null)
+            //{
+            //    x = 0;
+            //}
+            //else
+            //{
+                x = 4 * (car1.Value) + (car2.Value);
+            //}
+            
             pdfViewer.GotoPage(cb.getTable(x));
 
         }

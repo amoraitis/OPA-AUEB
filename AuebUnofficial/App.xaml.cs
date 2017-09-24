@@ -4,9 +4,11 @@ using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using Windows.Networking.PushNotifications;
-using Microsoft.WindowsAzure.Messaging;
-using Windows.UI.Popups;
+using Microsoft.Azure.Mobile;
+using Microsoft.Azure.Mobile.Analytics;
+using Microsoft.Azure.Mobile.Push;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace AuebUnofficial
 {
@@ -16,6 +18,8 @@ namespace AuebUnofficial
     sealed partial class App : Application
     {
         public string eclassUsername { get; set; }
+        public string eclassPass { get; set; }
+        public string eclassUID { get; set; }
         public string eclassToken { get; set; }
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -43,7 +47,6 @@ namespace AuebUnofficial
             }
 #endif
             Frame rootFrame = Window.Current.Content as Frame;
-
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
             if (rootFrame == null)
@@ -56,7 +59,7 @@ namespace AuebUnofficial
                 {
                     //TODO: Load state from previously suspended application
                 }
-
+                
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
@@ -73,7 +76,11 @@ namespace AuebUnofficial
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
-            InitNotificationsAsync();
+            MobileCenter.Start("bc8e0447-700a-4e68-a274-4cab46a9eac2", typeof(Analytics), typeof(Push));
+            Push.CheckLaunchedFromNotification(e);
+            eclassUID = await GetUserIdAsync();
+            if (eclassUID==null) eclassUID = null;
+            
         }
 
         /// <summary>
@@ -99,22 +106,21 @@ namespace AuebUnofficial
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
-        private async void InitNotificationsAsync()
+        public async Task<string> GetUserIdAsync()
         {
-            var channel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
-            var hub = new NotificationHub("AuebUnofficial", "Endpoint=sb://auebunofficial.servicebus.windows.net/;SharedAccessKeyName=DefaultListenSharedAccessSignature;SharedAccessKey=uIzQvWCv0QkBvpV9uHS78dObqB40m0BcfA9+6GTPQfM=");
-            var result = await hub.RegisterNativeAsync(channel.Uri);
-
-            /** Displays the registration ID so you know it was successful
-            if (result.RegistrationId != null)
-            {
-                var dialog = new MessageDialog("Registration successful: " + result.RegistrationId);
-                dialog.Commands.Add(new UICommand("OK"));
-                await dialog.ShowAsync();
-                // !visible dialog
+            var fileName = "user_id";
+            var folder = ApplicationData.Current.RoamingFolder;
+            var file = await folder.TryGetItemAsync(fileName);
+            if (file == null)
+            {                
+                return null;
             }
-            **/
+            else
+            {
+                //else we return the already exising uid
+                var storageFile = await folder.GetFileAsync(fileName);
+                return await FileIO.ReadTextAsync(storageFile);
+            }
         }
     }
-    
 }
