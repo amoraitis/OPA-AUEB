@@ -72,8 +72,16 @@
                     <PasswordBox Grid.Column="2" BorderThickness="0" x:Name="pass" PlaceholderText="Password"/>
                 </Grid>
             </Border>
-            
-            <Grid>
+            <Grid x:Name="CheckGrid" Margin="2,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <CheckBox x:Name="ForeverCheckbox" Content="Remember me" HorizontalAlignment="Left" 
+                          Grid.Row="1" Checked="ForeverCheckbox_Checked" Unchecked="ForeverCheckbox_Unchecked"
+                          ToolTipService.ToolTip="Remember the login data even if the app close"/>
+            </Grid>
+            <Grid x:Name="ButtonsGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -88,7 +96,8 @@
                 </Border>
                 <Border Height="10" Grid.Row="2"/>
                 <Border CornerRadius="5" Grid.Row="3" BorderBrush="#58B957" BorderThickness="1" Background="#58B957">
-                    <HyperlinkButton x:Name="Login" HorizontalAlignment="Stretch" Click="ButtonClick" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" Background="#58B957" Foreground="White">
+                    <HyperlinkButton x:Name="LoginBtn" HorizontalAlignment="Stretch" Click="ButtonClick" VerticalAlignment="Center" 
+                                     FontWeight="Bold" FontSize="14" Background="#58B957" Foreground="White" ToolTipService.ToolTip="Enter">
                         <TextBlock Text="Log in"/>
                     </HyperlinkButton>
                 </Border>           
